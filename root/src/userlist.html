@@ -1,0 +1,331 @@
+<section class="off-canvas docs-container" id="application" >
+    <div class="docs-navbar">
+      <a class="off-canvas-toggle btn btn-link btn-action" href="#sidebar">
+        <i class="icon icon-menu" ></i>
+      </a>
+    </div>
+    <div id="sidebar" class="docs-sidebar off-canvas-sidebar">
+      <div class="docs-brand">
+        <a href="index.html" class="docs-logo">
+          <h2>ON AIR</h2>
+        </a>
+      </div>
+      <div class="docs-nav">
+        <div class="accordion-container">
+          <div class="accordion">
+            <input type="checkbox" id="docs-accordion-1" name="docs-accordion-checkbox" hidden="" checked="checked">
+            <label class="accordion-header c-hand" for="docs-accordion-1">
+              Пользователи
+            </label>
+            <div class="accordion-body">
+              <ul class="menu menu-nav">
+                <li class="menu-item">
+                  <a href="/">Главная</a>
+                </li>
+                <li class="menu-item">
+                  <a href="#">Список пользователей</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a class="off-canvas-overlay" href="#close"></a>
+    <div class="docs-content off-canvas-content" >
+        <div class="container" >
+            <div class="s-title" >
+                <h3 >Список пользователей </h3>
+                
+                <div class="dropdown">
+                    <button href="#" class="btn btn-small dropdown-toggle" tabindex="0">
+                            Создать <i class="icon icon-caret"></i>
+                    </button>
+                    <!-- menu component -->
+                    <ul class="menu text-left">
+                        <li class="menu-item">
+                            <a href="#" @click="createSingle()" >Одну запись</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" @click="createMultiple()">Набор записей</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="dropdown">
+                    <button href="#" class="btn btn-small dropdown-toggle" tabindex="0">
+                            Удалить <i class="icon icon-caret"></i>
+                    </button>
+                    <!-- menu component -->
+                    <ul class="menu text-left">
+                        <li class="menu-item" al-if="sel_count() > 0">
+                            <a href="#" @click="removeSelected()">Выделенные строки</a>
+                        </li>
+                        
+                        <li class="menu-item">
+                            <a href="#" @click="removeAllExceptMe()">Всех, кроме вас</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" @click="removeInactive()">Всех неактивных</a>
+                        </li>
+                    </ul>
+                </div>
+                                    
+                <div class="dropdown" al-if="sel_count() > 0" >
+                    <button href="#" class="btn btn-small dropdown-toggle" tabindex="0">
+                            Действия с выбранными строками <i class="icon icon-caret"></i>
+                    </button>
+                    <!-- menu component -->
+                    <ul class="menu text-left">
+                        <li class="menu-item">
+                            <a href="#" @click="removeSelected()">Удалить</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" @click="activateSelection(true)">Активировать</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" @click="activateSelection(false)">Деактивировать</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#" @click="modifyDate()">Установить срок действия</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="empty" al-if="watchers_cnt() === 0">
+                <div class="empty-icon">
+                    <i class="icon icon-3x icon-message"></i>
+                </div>
+                <p class="empty-title h5">У вас нет созданных учетных записей</p>
+                <p class="empty-subtitle">Предлагаем создать набор учетных записей для просмотра</p>
+                <div class="empty-action">
+                    <button class="btn btn-primary" @click="createMultiple()">Создать учетные записи</button>
+                </div>
+            </div>
+            
+            <p></p>
+            <div class="toast toast-primary" al-if="messagevisible && watchers_cnt() > 0 && watchers_actcnt() === 0">
+                <button class="btn btn-clear float-right" @click="messagevisible = false"></button>
+                <h6>Ни одной активной учетной записи</h6>
+                <small>На данный момент никто не может просматривать вещание с этого сервера</small>
+            </div>
+            
+            <progress al-if="busy" class="progress" max="100"></progress>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Пользователь</th>
+                        <th></th>
+                        <th>Свойства</th>
+                        <th>Действителен до</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr al-repeat="entry in entries" >
+                        <td>
+                            <div class="form-group" >
+                                <label class="form-checkbox"><input type="checkbox" al-checked="entry.selected" ><i class="form-icon"></i> {! entry.username !}</label>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-link" @click="modifyEntity(entry)" >Редактировать</button>
+                        </td>
+                        <td>
+                            <span class="chip" al-if="entry.active === 1" >активен</span>
+                            <span class="chip" al-if="entry.is_admin === 1">администратор</span>
+                        </td>
+                        <td>{! entry.valid_to !}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="modal" :class.active="modal === 'dateEditor'" >
+            <div class="modal-overlay"></div>
+            <div class="modal-container">
+                <div class="modal-header">
+                    <button class="btn btn-clear float-right" @click="modalClose()" ></button>
+                    <div class="modal-title h5">Установить срок действия</div>
+                </div>
+                <div class="modal-body">
+                    <div class="content">
+                        <input class="form-input" 
+                               type="date" 
+                               al-value="dateEditor.targetDate">
+                               
+                        <p>{! dateEditor.valid_msg() !}</p>
+                    </div>
+                </div>                
+                <div class="modal-footer">
+                    <button class="btn" 
+                            @click="modalClose()" >Отмена</button>
+                    <button class="btn btn-primary" 
+                            @click="dateEditor.targetDate = ''; dateEditor.proceed()">Сбросить</button>
+                    <button class="btn btn-primary" 
+                            @click="dateEditor.proceed()">Выполнить</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal" :class.active="modal === 'singleEditor'">
+            <div class="modal-overlay"></div>
+            <div class="modal-container">
+                <div class="modal-header">
+                    <button class="btn btn-clear float-right" @click="modalClose()" ></button>
+                    <div class="modal-title h5">{! singleUser.title !}</div>
+                </div>
+                <div class="modal-body">
+                    <div class="content">
+                        <div class="form-horizontal" >
+                            <div class="form-group">
+                                <div class="col-3" >
+                                    <label class="form-label" for="username">Имя</label>
+                                </div>
+                                <div class="col-9" >
+                                    <input al-value="singleUser.username" 
+                                           class="form-input" 
+                                           type="text" 
+                                           name="username" 
+                                           :readonly="singleUser.mode === 'modify'" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" >
+                                    <label class="form-label" for="password">Пароль</label>
+                                </div>
+                                <div class="col-9" >
+                                    <input class="form-input" 
+                                           type="password" 
+                                           name="password" 
+                                           al-value="singleUser.password" >            
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" >
+                                    <label class="form-label" for="valid_to">Срок действия</label>
+                                </div>
+                                <div class="col-9" >
+                                    <input class="form-input" 
+                                           type="date" 
+                                           name="valid_to" 
+                                           al-value="singleUser.valid_to" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" ></div>
+                                <div class="col-9" >
+                                    <label class="form-switch">
+                                        <input type="checkbox" al-checked="singleUser.active" >
+                                        <i class="form-icon"></i> Учетная запись активна
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" ></div>
+                                <div class="col-9" >
+                                    <label class="form-switch">
+                                        <input type="checkbox" al-checked="singleUser.is_admin">
+                                        <i class="form-icon"></i> Учетная запись имеет административные полномочия
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" ></div>
+                                <div class="col-9" >
+                                    <p al-repeat="msg in singleUser.valid_msg()" >
+                                        <small>{! msg !}</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                <div class="modal-footer">
+                    <button class="btn" @click="modalClose()">Отмена</button>
+                    <button class="btn btn-primary" @click="singleUser.proceed()">Выполнить</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal" :class.active="modal === 'multiEditor'">
+            <div class="modal-overlay"></div>
+            
+            <div class="modal-container">
+                <div class="modal-header">
+                    <button class="btn btn-clear float-right" @click="modalClose()"></button>
+                    <div class="modal-title h5">Пакетное создание</div>
+                </div>
+                <div class="modal-body">
+                    <div class="content">
+                        <div class="form-horizontal" al-if="multiEditor.state == 'enter'" >
+                            <div class="form-group">
+                                <div class="col-3" >
+                                    <label class="form-label" for="prefix">Префикс</label>
+                                </div>
+                                <div class="col-9" >
+                                    <input class="form-input" 
+                                           type="text" 
+                                           name="prefix" 
+                                           al-value="multiEditor.prefix">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" >
+                                    <label class="form-label" for="count">Количество</label>
+                                </div>
+                                <div class="col-9" >
+                                    <input class="form-input" 
+                                           type="number" min="1" max="10" 
+                                           name="count" 
+                                           al-value="multiEditor.create_cnt">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" >
+                                    <label class="form-label" for="valid_to">Срок действия</label>
+                                </div>
+                                <div class="col-9" >
+                                    <input class="form-input" 
+                                           type="date" 
+                                           name="valid_to" 
+                                           al-value="multiEditor.valid_to">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-3" ></div>
+                                <div class="col-9" >
+                                    <label class="form-switch">
+                                        <input type="checkbox" 
+                                               al-checked="multiEditor.active">
+                                        <i class="form-icon"></i> Активировать записи
+                                    </label>
+                                </div>
+                            </div>    
+                            <p>{! multiEditor.valid_msg() !}</p>
+                        </div>
+                        <div al-if="multiEditor.state === 'results'" >
+                            <p >{! multiEditor.message !}</p>
+                            <p al-if="multiEditor.entries.length > 0" >
+                                <b>Созданные записи ({! multiEditor.entries.length !}):</b>
+                            </p>
+                            <ul al-repeat="entry in multiEditor.entries" >
+                                <li><b>{! entry.username !}</b> пароль {!entry.password !}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>                
+                <div class="modal-footer">
+                    <button class="btn" al-if="multiEditor.state === 'enter'" @click="modalClose()" >Отмена</button>
+                    <button class="btn btn-primary" al-if="multiEditor.state === 'enter'" @click="multiEditor.proceed()">Выполнить</button>
+                    <button class="btn btn-primary" al-if="multiEditor.state === 'results'" @click="modalClose()">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript" >
+    window["__initdata"] = {
+        entries: {{ entries }}
+    };
+</script>

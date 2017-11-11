@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html >
+<html lang="ru" >
+    <head>
+        <title>{{ site.title }}</title>
+        
+        {% for link in stylesheets %}
+        <link rel="stylesheet" href="{{ link }}" />
+        {% endfor %}
+    </head>
+    <body class="{{ bodyclass }}">
+        {{ content }}
+    </body>
+    {% for scriptinfo in scripts %}
+    <script type="text/javascript" src="{{ scriptinfo }}" ></script>
+    {% endfor %}
+</html>

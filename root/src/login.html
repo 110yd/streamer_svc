@@ -1,0 +1,31 @@
+<section class="content form-login" >
+    <div class="columns" >
+        <div class="col-4 col-mx-auto logo" ></div>
+    </div>
+    <div class="columns" >
+        <form class="col-4 col-mx-auto" method="post" >
+            <fieldset >
+                {% if error_msg %}
+                    <p>
+                        <span class="message">{{ status_msg }}{{ c.request.params.status_msg|escape }}</span>
+                        <mark class="error">{{ error_msg }}</mark>
+                    </p>
+                {% endif %}
+            
+                <div class="form-group" >
+                    <label class="form-label" for="username" >Имя пользователя</label>
+                    <input class="form-input" type="text" name="username">
+                </div>
+                
+                <div class="form-group" >
+                    <label class="form-label" for="password" >Пароль</label>
+                    <input class="form-input" type="password" name="password">
+                </div>
+                
+                <div class="form-group" >
+                    <input class="btn btn-primary" type="submit" value="Войти">
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</section>
