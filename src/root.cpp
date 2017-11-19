@@ -15,7 +15,9 @@ void root::index(Context *c)
         { "template",    "player.html" },
         { "username",    user.id() },
         { "is_admin",    user["is_admin"].toInt() == 1 },
-        { "scripts",     QVariantList { "/static/js/dash.all.min.js" }},
+        { "scripts",     QVariantList { 
+            "/static/js/dash.all.min.js"
+        }},
         { "stylesheets", QVariantList { 
             "/static/css/spectre.min.css",
             "/static/css/player.css"

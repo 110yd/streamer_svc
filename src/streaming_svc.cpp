@@ -18,6 +18,7 @@
 #include "login.h"
 #include "logout.h"
 #include "authstoresql.h"
+#include "authenticatedstatic.h"
 
 using namespace Cutelyst;
 
@@ -34,8 +35,11 @@ bool streaming_svc::init()
     new logout(this);
     
     //-- Activate components
-    new StaticSimple(this);
+    //new StaticSimple(this);
     new Session(this);
+    auto authstatic = new AuthenticatedStatic(this);
+    authstatic->setBasePath       ("dash/");
+    authstatic->setStaticDirectory("/tmp/dash/");
     
     //-- Activate view engine
     auto view = new GrantleeView(this);

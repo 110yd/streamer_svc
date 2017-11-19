@@ -2,4 +2,8 @@
     <span class="chip" >{{ username }}</span> {% if is_admin %}<a class="btn btn-link" href="/users" >Пользователи</a>{% endif %}<a class="btn btn-link" href="/logout" >Выйти из системы</a>
 </div>
 
-<video ></video>
+<div class="dash-video-player">
+    <video data-dashjs-player autoplay src="/dash/live.mpd" controls ></video>
+</div>
+
+
